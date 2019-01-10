@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Reflection;
+using Serilog;
 
 namespace CleanArchitecture.Web
 {
@@ -20,6 +21,7 @@ namespace CleanArchitecture.Web
     {
         public Startup(IConfiguration config)
         {
+            Log.Logger = new LoggerConfiguration().CreateLogger();
             Configuration = config;
         }
 
@@ -48,6 +50,7 @@ namespace CleanArchitecture.Web
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
 
+
             return BuildDependencyInjectionProvider(services);
         }
 
@@ -68,10 +71,9 @@ namespace CleanArchitecture.Web
             return new AutofacServiceProvider(applicationContainer);
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggingBuilder loggerbuilder)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+
 
             if (env.IsDevelopment())
             {
@@ -102,6 +104,7 @@ namespace CleanArchitecture.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
         }
     }
 }
