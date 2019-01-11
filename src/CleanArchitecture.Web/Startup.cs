@@ -21,11 +21,10 @@ namespace CleanArchitecture.Web
     {
         public Startup(IConfiguration config)
         {
-            Log.Logger = new LoggerConfiguration().CreateLogger();
             Configuration = config;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
@@ -39,16 +38,13 @@ namespace CleanArchitecture.Web
             string dbName = Guid.NewGuid().ToString();
             services.AddDbContext<AppDbContext>(options =>
                 options.UseInMemoryDatabase(dbName));
-                //options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            //options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddMvc()
                 .AddControllersAsServices()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
-            });
+            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new Info {Title = "My API", Version = "v1"}); });
 
 
             return BuildDependencyInjectionProvider(services);
@@ -64,17 +60,16 @@ namespace CleanArchitecture.Web
             // TODO: Add Registry Classes to eliminate reference to Infrastructure
             Assembly webAssembly = Assembly.GetExecutingAssembly();
             Assembly coreAssembly = Assembly.GetAssembly(typeof(BaseEntity));
-            Assembly infrastructureAssembly = Assembly.GetAssembly(typeof(EfRepository)); // TODO: Move to Infrastucture Registry
+            Assembly infrastructureAssembly =
+                Assembly.GetAssembly(typeof(EfRepository)); // TODO: Move to Infrastucture Registry
             builder.RegisterAssemblyTypes(webAssembly, coreAssembly, infrastructureAssembly).AsImplementedInterfaces();
 
             IContainer applicationContainer = builder.Build();
             return new AutofacServiceProvider(applicationContainer);
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggingBuilder loggerbuilder)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -93,10 +88,7 @@ namespace CleanArchitecture.Web
             app.UseSwagger();
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            });
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); });
 
             app.UseMvc(routes =>
             {
@@ -104,7 +96,6 @@ namespace CleanArchitecture.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-
         }
     }
 }
